@@ -1,5 +1,12 @@
-*DATA 621 – Business Analytics and Data Mining*    
-*Homework #2 A*      
+---
+title: "DATA 621: HW 2"
+author: 'Group 2: Banu Boopalan, Gregg Maloy, Alexander Moyse, Umais Siddiqui'
+output:
+  pdf_document:
+    latex_engine: xelatex
+  html_document:
+    df_print: paged
+---
 
 **Instructions**        
 In this homework assignment, you will work through various classification metrics. You will be asked
@@ -19,15 +26,15 @@ print(data)
 ```
 **2. The data set has three key columns we will use:**    
 
-**class: the actual class for the observation**      
-**scored.class: the predicted class for the observation (based on a threshold of 0.5)**        
-**scored.probability: the predicted probability of success for the observation**     
+* class: the actual class for the observation      
+* scored.class: the predicted class for the observation (based on a threshold of 0.5)        
+* scored.probability: the predicted probability of success for the observation
 
 **Use the table() function to get the raw confusion matrix for this scored dataset. Make sure you**
 **understand the output. In particular, do the rows represent the actual or predicted class? The**
 **columns?**
 
-***Question 2 answer:***     
+***Question 2 Answer:***     
 
 Rows represent the predicted class.     
 Columns represent the actual class.     
@@ -50,7 +57,7 @@ confusion_matrix
 ```
 **3. Write a function that takes the data set as a dataframe, with actual and predicted classifications identified, and returns the accuracy of the predictions.**
 $$
-\text{𝐴𝑐𝑐𝑢𝑟𝑎𝑐𝑦} = \frac{𝑇𝑃 + 𝑇𝑁}{𝑇𝑃 + 𝐹𝑃 + 𝑇𝑁 + 𝐹N}
+\text{Accuracy} = \frac{TP + TN}{TP + FP + TN + FN}
 $$
 
 ```{r, warning=FALSE, message=FALSE}
@@ -131,7 +138,7 @@ print(paste("Sensitivity:", sensitivity))
 **7. Write a function that takes the data set as a dataframe, with actual and predicted classifications identified, and returns the specificity of the predictions.**
 
 $$
-\text{𝑆𝑝𝑒𝑐𝑖𝑓𝑖𝑐𝑖𝑡𝑦} = \frac{TN}{TN + FP}
+\text{Specificity} = \frac{TN}{TN + FP}
 $$
 
 ```{r, warning=FALSE, message=FALSE}
@@ -148,7 +155,7 @@ print(paste("Specificity:", specificity))
 **8. Write a function that takes the data set as a dataframe, with actual and predicted classifications identified,and returns the F1 score of the predictions.**    
 
 $$
-\text{F1 𝑆𝑐𝑜𝑟𝑒} = \frac{2 × 𝑃𝑟𝑒𝑐𝑖𝑠𝑖𝑜𝑛 × 𝑆𝑒𝑛𝑠𝑖𝑡𝑖𝑣𝑖𝑡𝑦}{𝑃𝑟𝑒𝑐𝑖𝑠𝑖𝑜𝑛 + 𝑆𝑒𝑛𝑠𝑖𝑡𝑖𝑣𝑖𝑡𝑦}
+\text{F1 Score} = \frac{2 × Precision × Sensitivity}{Precision + Sensitivity}
 $$
 ```{r, warning=FALSE, message=FALSE}
 calculate_f1_score <- function(data, actual_col, predicted_col) {
@@ -161,27 +168,60 @@ f1_score <- calculate_f1_score(data, actual_col = "class", predicted_col = "scor
 print(paste("F1 Score:", f1_score))
 ```
 **9. Before we move on, let’s consider a question that was asked: What are the bounds on the F1 score? Show that the F1 score will always be between 0 and 1. (Hint: If 0 < 𝑎 < 1 and 0 < 𝑏 < 1 then 𝑎𝑏 < 𝑎.)**
+
+The bounds are between 0 and 1 since the F1 score is a ratio.
+
+Below is the formula for the F1 score
+$$
+\text{F1 Score} = \frac{2 × Precision × Sensitivity}{Precision + Sensitivity}
+$$
+We know that highest possible value for both precision and sensitivity individually is 0.99 because precision and sensitivity are ratios. (If 0 < precision < 1 and 0 < sensitivity < 1 then 𝑎𝑏 < 𝑎.)
+
+We can demonstrate this by plugging in the highest possible values for precision and sensitivity into the F1 equation.
+
+$$
+\text{F1 Score} = \frac{2 × 0.99 × 0.99}{0.99 + 0.99}
+$$
+$$
+\text{F1 Score} = 0.99 = \frac{1.9602}{1.98}
+$$    
+Likewise we can plug the lowest value (0.01) into the F1 Score formula.
+$$
+\text{F1 Score} = 0.01 = \frac{0.0002}{0.02}
+$$ 
 ```{r, warning=FALSE, message=FALSE}
 ```
 **10. Write a function that generates an ROC curve from a data set with a true classification column (class in our example) and a probability column (scored.probability in our example). Your function should return a list that includes the plot of the ROC curve and a vector that contains the calculated area under the curve (AUC). Note that I recommend using a sequence of thresholds ranging from 0 to 1 at 0.01 intervals.**    
+
 ```{r, warning=FALSE, message=FALSE}
-roc_func <- function(x,y){
-  x <- x[order(y, decreasing=TRUE)]
-  TP = cumsum(x)/sum(x)
-  FP = cumsum(!x)/sum(!x)
+roc_func <- function(x, y) {
+  thresholds <- sort(unique(y), decreasing = TRUE)
+  TP <- numeric(length(thresholds))
+  FP <- numeric(length(thresholds))
   
-  df <- data.frame(TP, FP)
-  diffFP <- c(diff(FP), 0)
-  diffTP <- c(diff(TP), 0)
-  auc <- sum(TP * diffFP) + 
-    sum(diffTP * diffFP)/2
+  for (i in seq_along(thresholds)) {
+    TP[i] <- sum(x[y >= thresholds[i]]) / sum(x) 
+    FP[i] <- sum(!x[y >= thresholds[i]]) / sum(!x) 
+  }
   
-  return(c(df=df, auc = auc))
+  auc <- sum(diff(FP) * (TP[-1] + TP[-length(TP)]) / 2)
+  
+  df <- data.frame(TP = TP, FP = FP)
+  return(list(df = df, auc = auc))
 }
+
 roc_data <- roc_func(data$class, data$scored.probability)
-plot(roc_data[[1]], 
-     col="blue", 
-     lwd=1)
+
+
+plot(roc_data$df$FP, 
+     roc_data$df$TP, 
+     type = "l", 
+     col = "blue", 
+     lwd = 2,
+     xlab = "Specificity",
+     ylab = "Sensitivity",
+     main = paste("ROC Curve (AUC =", round(roc_data$auc, 3), ")"))
+abline(a = 0, b = 1, col = "red", lty = 2) # Diagonal line
 ```
 
 ```{r, warning=FALSE, message=FALSE}
@@ -222,14 +262,14 @@ spec <- specificity(data$scored.class, data$class)
 print(paste("Specificity:", spec))
 
 ```
-**13. Investigate the pROC package. Use it to generate an ROC curve for the data set. How do the results compare with your own functions?**
-Both are comparable.
+**13. Investigate the pROC package. Use it to generate an ROC curve for the data set. How do the results compare with your own functions?**    
+
+Both graphs are visually comparable, and both the pROC package and my custom function yielded an identical AUC of 0.85. This AUC value indicates a strong model fit, demonstrating that the model effectively identifies true positives while minimizing false positives. 
 ```{r, warning=FALSE, message=FALSE}
+
 library(pROC)
 roc_obj <- roc(data$class, data$scored.probability)
-plot(roc_obj, col = "blue", lwd = 2, main = "ROC Curve using pROC")
-
-#AUC
+plot(roc_obj, col = "blue", lwd = 2, main = "ROC Curve using pROC", legacy.axes = TRUE)
 auc_value <- auc(roc_obj)
 print(paste("AUC from pROC:", auc_value))
 ```
