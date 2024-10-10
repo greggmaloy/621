@@ -2,10 +2,10 @@
 title: "DATA 621: HW 2"
 author: 'Group 2: Banu Boopalan, Gregg Maloy, Alexander Moyse, Umais Siddiqui'
 output:
-  pdf_document:
-    latex_engine: xelatex
   html_document:
     df_print: paged
+  pdf_document:
+    latex_engine: xelatex
 ---
 
 **Instructions**        
@@ -36,26 +36,33 @@ print(data)
 
 ***Question 2 Answer:***     
 
-Rows represent the predicted class.     
-Columns represent the actual class.     
+Rows represent the predicted class.  The rows are essentially what is predicted by the model, with 0 representing no predicted condition/disease and 1 representing those individuals predicted by the model to have a condition/disease.
 
-Row 0, Column 0 (120): This represents True Negatives—120 cases where the predicted class was 0 and the
-actual class was also 0.     
+Columns represent the actual class.  The columns represent the true condition/disease state, with 0 representing the individual not having the condition/disease and 1 representing those individuals who actually have the condition/disease.
+
+By arranging the actual and predicted classes in a confusion matrix/cross tabs/pivot tab, calculations ,ie sensitivity and specifity, can be derived which provide information about the models predictive power.
+
+Below is a break down of the various sections of a confusion matrix:
+
+Row 0, Column 0 (119): This represents True Negatives—119 cases where the predicted class was 0 and the
+actual class was also 0. In other words, there were 119 cases that were predicted to be negative that were actually negative (predicted negative and actually negative).    
 
 Row 0, Column 1 (30): This represents False Negatives—30 cases where the predicted class was 0 but the
-actual class was 1.     
+actual class was 1.  In other words, there were 30 cases where the model does not predict the  condition/state, but that individual/case actually has the condition/disease.  (predicted negative and actually positive).       
 
-Row 1, Column 0 (25): This represents False Positives—25 cases where the predicted class was 1 but the
-actual class was 0.     
+Row 1, Column 0 (5): This represents False Positives—5 cases where the predicted class was 1 but the
+actual class was 0. In other words, there were 5 cases where the model predicted the  condition/state/disease, but that individual/case actually did not have the condition/state/disease.  (predicted positive and actually negative)   
 
-Row 1, Column 1 (125): This represents True Positives—125 cases where the predicted class was 1 and the
-actual class was 1.
+Row 1, Column 1 (27): This represents True Positives—27 cases where the predicted class was 1 and the
+actual class was 1.  In other words, there were 27 case where both the prediction and actual state/condition/disease were positive. (predicted positive and actually positive)
 
 ```{r, warning=FALSE, message=FALSE}
 confusion_matrix <- table(data$scored.class,data$class)
 confusion_matrix
 ```
-**3. Write a function that takes the data set as a dataframe, with actual and predicted classifications identified, and returns the accuracy of the predictions.**
+**3. Write a function that takes the data set as a dataframe, with actual and predicted classifications identified, and returns the accuracy of the predictions.**    
+
+In general, accuracy represents the percent of times a model correctly matches/identifies the actual state.  The accuracy of our model was determined to be 0.8066298. An accuracy of 0.8066298 indicates that the model is correct 80.66% of the time and incorrect the other ~19% of the time.  The formula is composed of the sum of true positives and true negatives divided by the sample size.
 $$
 \text{Accuracy} = \frac{TP + TN}{TP + FP + TN + FN}
 $$
@@ -78,6 +85,12 @@ accuracy <- calculate_accuracy(data, actual_col = "class", predicted_col = "scor
 print(accuracy)
 ```           
 **4. Write a function that takes the data set as a dataframe, with actual and predicted classifications identified, and returns the classification error rate of the predictions.  Verify that you get an accuracy and an error rate that sums to one.**
+
+
+In general, the classification error rate represents the percent of times the model incorrectly matches/identifies the actual state. A classification error rate of 0.1933702 means that the model makes incorrect predictions approximately 19.34% of the time. The formula is composed of the sum of false positives and false negatives divided by the sample size.  
+
+Additionally, the classification error rate added to the accuracy will always equal 1 because when added together, this is because the classification error and the precision rate combined, account for every observation in the dataset.
+
 $$
 \text{Classification Error Rate} = \frac{FP + FN}{TP + FP + TN + FN}
 $$
@@ -101,7 +114,10 @@ validate<-classification_error +accuracy
 print(paste("Classification error + accuracy =", validate))
             
 ```           
-**5. Write a function that takes the data set as a dataframe, with actual and predicted classifications identified and returns the precision of the predictions.**
+**5. Write a function that takes the data set as a dataframe, with actual and predicted classifications identified and returns the precision of the predictions.**     
+
+
+Precision measures the proportion of true positive predictions among all positive predictions. Our model's precision of 0.84375 means that 84.38% of the instances predicted as positive by the model were correctly identified as true positives.  In other words, precision measures the amount of the population/sample which are correctly predicted to be positive divided by all of those who actually have the state/condition/disease, including false positives.
 $$
 \text{Precision} = \frac{TP}{TP + FP}
 $$ 
@@ -117,7 +133,8 @@ calculate_precision <- function(data, actual_col, predicted_col) {
 precision <- calculate_precision(data, actual_col = "class", predicted_col = "scored.class")
 print(paste("Precision: ", precision))
 ```
-**6. Write a function that takes the data set as a dataframe, with actual and predicted classifications identified, and returns the sensitivity of the predictions. Sensitivity is also known as recall.**    
+**6. Write a function that takes the data set as a dataframe, with actual and predicted classifications identified, and returns the sensitivity of the predictions. Sensitivity is also known as recall.**       
+Sensitivity measures the proportion of actual positive instances that are correctly identified by the model. The sensitivity for our model was determined to be 0.4737. A sensitivity of this amount can be interpreted as the model correctly identifies ~47% of the actual positive cases.  In other words, the model was unable to predict about half of the actually positive cases.
 
 $$
 \text{Sensitivity} = \frac{TP}{TP + FN}
@@ -135,8 +152,9 @@ calculate_sensitivity <- function(data, actual_col, predicted_col) {
 sensitivity <- calculate_sensitivity(data, actual_col = "class", predicted_col = "scored.class")
 print(paste("Sensitivity:", sensitivity))
 ```
-**7. Write a function that takes the data set as a dataframe, with actual and predicted classifications identified, and returns the specificity of the predictions.**
+**7. Write a function that takes the data set as a dataframe, with actual and predicted classifications identified, and returns the specificity of the predictions.**    
 
+Specificity measures the proportion of actual negative instances that are correctly identified by the model. The specificity of our mode was determined to be 0.9597.  A specificity of this amount means that the model correctly identifies ~96% of the actual negative cases.
 $$
 \text{Specificity} = \frac{TN}{TN + FP}
 $$
@@ -153,7 +171,7 @@ specificity <- calculate_specificity(data, actual_col = "class", predicted_col =
 print(paste("Specificity:", specificity))
 ```    
 **8. Write a function that takes the data set as a dataframe, with actual and predicted classifications identified,and returns the F1 score of the predictions.**    
-
+The F1 score is essentially a tool/ metric utilized to balance precision and sensitivity, as in some cases, precision and sensitivity are a trade off, with one being more desirable than the other. Our model was determined to have an F1 score of 0.606741573033708. An F1 score of 60.67% represents a moderate F1 score with room for improvement.
 $$
 \text{F1 Score} = \frac{2 × Precision × Sensitivity}{Precision + Sensitivity}
 $$
@@ -192,7 +210,6 @@ $$
 ```{r, warning=FALSE, message=FALSE}
 ```
 **10. Write a function that generates an ROC curve from a data set with a true classification column (class in our example) and a probability column (scored.probability in our example). Your function should return a list that includes the plot of the ROC curve and a vector that contains the calculated area under the curve (AUC). Note that I recommend using a sequence of thresholds ranging from 0 to 1 at 0.01 intervals.**    
-
 ```{r, warning=FALSE, message=FALSE}
 roc_func <- function(x, y) {
   thresholds <- sort(unique(y), decreasing = TRUE)
@@ -236,8 +253,9 @@ names(df) <- c("Accuracy", "Error", "F1", "Percision", "Sensitivity", "Spec")
 kable(df)
 ```
     
-**12. Investigate the caret package. In particular, consider the functions confusionMatrix, sensitivity, and specificity. Apply the functions to the data set. How do the results compare with your own functions?** 
-The results are comparable to the results of our functions.
+**12. Investigate the caret package. In particular, consider the functions confusion Matrix, sensitivity, and specificity. Apply the functions to the data set. How do the results compare with your own functions?**      
+
+The caret results are identical to the results of our functions. Sensitivity is identical (caret=0.4737 vs our function=0.4737), specificity is identical (caret=0.9597 vs our function=0.9597), accuracy is identical (caret=0.8066 vs our function=0.8066), and precision is identical (caret=0.8438 vs our function=0.8438).  The caret package did not caluclate F1 score, but if it did, it would be identical.
 ```{r, warning=FALSE, message=FALSE}
 #install.packages("caret")
 #install.packages("proc")
@@ -246,8 +264,8 @@ The results are comparable to the results of our functions.
 ```{r, warning=FALSE, message=FALSE}
 library(caret)
 
-data$class <- factor(data$class, levels = c(0, 1))  
-data$scored.class <- factor(data$scored.class, levels = c(0, 1))  
+data$class <- factor(data$class, levels = c(1, 0))  
+data$scored.class <- factor(data$scored.class, levels = c(1, 0))  
 
 conf_matrix <- confusionMatrix(data$scored.class, data$class)
 
